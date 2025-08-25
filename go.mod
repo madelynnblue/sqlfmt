@@ -1,4 +1,4 @@
-module github.com/mjibson/sqlfmt
+module github.com/maddyblue/sqlfmt
 
 go 1.19
 

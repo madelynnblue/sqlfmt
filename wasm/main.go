@@ -4,7 +4,7 @@ import (
 	"syscall/js"
 
 	"github.com/cockroachdb/cockroachdb-parser/pkg/sql/sem/tree"
-	"github.com/mjibson/sqlfmt"
+	"github.com/maddyblue/sqlfmt"
 )
 
 func main() {

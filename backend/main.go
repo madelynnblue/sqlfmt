@@ -24,7 +24,7 @@ import (
 	flag "github.com/spf13/pflag"
 	"golang.org/x/crypto/acme/autocert"
 
-	"github.com/mjibson/sqlfmt"
+	"github.com/maddyblue/sqlfmt"
 )
 
 type Specification struct {
@@ -440,7 +440,7 @@ textarea {
 
 	Editor = `{{define "content"}}
 <h1>editor configuration</h1>
-sqlfmt is available as a <a href="https://github.com/mjibson/sqlfmt/releases/latest">standalone binary</a>. You can configure your editor to run it on .sql files on save, or over selected text.
+sqlfmt is available as a <a href="https://github.com/maddyblue/sqlfmt/releases/latest">standalone binary</a>. You can configure your editor to run it on .sql files on save, or over selected text.
 
 <hr>
 <a href="/">index</a>
@@ -516,8 +516,8 @@ sqlfmt was inspired by <a href="https://prettier.io/">prettier</a>. It is based 
 <hr>
 <a href="/">index</a>
 <a href="/editor">editor config</a>
-<br>by <a href="https://twitter.com/mjibson">@mjibson</a>
-<br>code: <a href="https://github.com/mjibson/sqlfmt">github.com/mjibson/sqlfmt</a>
+<br>by <a href="https://twitter.com/maddyblue">@maddyblue</a>
+<br>code: <a href="https://github.com/maddyblue/sqlfmt">github.com/maddyblue/sqlfmt</a>
 {{end}}`
 
 	Index = `{{define "content"}}
