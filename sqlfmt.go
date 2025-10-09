@@ -1,9 +1,7 @@
 package sqlfmt
 
 import (
-	"math/rand"
 	"regexp"
-	"strconv"
 	"strings"
 	"unicode"
 
@@ -53,7 +51,11 @@ func FmtSQL(cfg tree.PrettyCfg, stmts []string) (string, error) {
 				return "", err
 			}
 			for _, parsed := range allParsed {
-				prettied.WriteString(cfg.Pretty(parsed.AST))
+				pretty, err := cfg.Pretty(parsed.AST)
+				if err != nil {
+					return "", err
+				}
+				prettied.WriteString(pretty)
 				prettied.WriteString(";\n")
 				hasContent = true
 			}
@@ -64,17 +66,6 @@ func FmtSQL(cfg tree.PrettyCfg, stmts []string) (string, error) {
 	}
 
 	return strings.TrimRightFunc(prettied.String(), unicode.IsSpace), nil
-}
-
-func parseBool(val string) (bool, error) {
-	switch val {
-	case "on":
-		return true, nil
-	case "off":
-		return false, nil
-	default:
-		return strconv.ParseBool(val)
-	}
 }
 
 func FmtJSON(s string) (pretty.Doc, error) {
@@ -118,24 +109,4 @@ func fmtJSONNode(j json.JSON) pretty.Doc {
 
 func prettyBracket(l string, elems []pretty.Doc, r string) pretty.Doc {
 	return pretty.BracketDoc(pretty.Text(l), pretty.Join(",", elems...), pretty.Text(r))
-}
-
-var caseModes = map[string]func(string) string{
-	"upper":     strings.ToUpper,
-	"lower":     strings.ToLower,
-	"title":     titleCase,
-	"spongebob": spongeBobCase,
-}
-
-func titleCase(s string) string {
-	return strings.Title(strings.ToLower(s))
-}
-
-func spongeBobCase(s string) string {
-	var b strings.Builder
-	b.Grow(len(s))
-	for _, c := range s {
-		b.WriteRune(unicode.To(rand.Intn(2), c))
-	}
-	return b.String()
 }
