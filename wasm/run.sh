@@ -3,4 +3,4 @@
 export GOOS=js
 export GOARCH=wasm
 go build -o sqlfmt.wasm -v
-brotli -o ../docs/sqlfmt.wasm.br sqlfmt.wasm
+cp sqlfmt.wasm ../docs

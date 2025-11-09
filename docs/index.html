@@ -162,6 +162,78 @@
         </div>
         <div style="width: 150px">
           <h4 style="margin: 0">options:</h4>
+          <label title="tab/indent width" for="iw">tab width</label>
+          <input
+            type="number"
+            min="1"
+            max="16"
+            step="1"
+            name="indent"
+            value="4"
+            onChange="range()"
+            onInput="range()"
+            id="indent"
+          />
+          <br /><input
+            type="checkbox"
+            checked="1"
+            onChange="range()"
+            onInput="range()"
+            name="simplify"
+            id="simplify"
+          /><label for="simplify" title="simplify parentheses">simplify</label>
+          <br /><input
+            type="checkbox"
+            checked="1"
+            onChange="range()"
+            onInput="range()"
+            name="jsonfmt"
+            id="jsonfmt"
+          /><label for="jsonfmt" title="format json values">jsonfmt</label>
+          <br /><input
+            type="checkbox"
+            checked="0"
+            onChange="range()"
+            onInput="range()"
+            name="spaces"
+            id="spaces"
+          /><label for="spaces" title="use spaces instead of tabs"
+            >use spaces</label
+          >
+
+          <br />alignment mode: <br /><input
+            type="radio"
+            name="align"
+            value="0"
+            onChange="range()"
+            onInput="range()"
+            id="align1"
+            checked
+          /><label for="align1">no</label>
+          <input
+            type="radio"
+            name="align"
+            value="2"
+            onChange="range()"
+            onInput="range()"
+            id="align2"
+          /><label for="align2">full</label> <br /><input
+            type="radio"
+            name="align"
+            value="1"
+            onChange="range()"
+            onInput="range()"
+            id="align3"
+          /><label for="align3">partial</label>
+          <input
+            type="radio"
+            name="align"
+            value="3"
+            onChange="range()"
+            onInput="range()"
+            id="align4"
+          /><label for="align4">other</label>
+
           <span class="jsonly"
             ><br /><button type="button" onClick="resetVals()" id="reset">
               reset to defaults
@@ -206,6 +278,11 @@
       const actualWidth = document.getElementById("actual_width");
       const actualBytes = document.getElementById("actual_bytes");
       const n = document.getElementById("n");
+      const iw = document.getElementById("indent");
+      const simplify = document.getElementById("simplify");
+      const jsonfmt = document.getElementById("jsonfmt");
+      const align = document.theform.align;
+      const spaces = document.getElementById("spaces");
       const fmt = document.getElementById("fmt");
       const sqlEl = document.getElementById("sql");
       const share = document.getElementById("share");
@@ -265,14 +342,38 @@
         }
         const v = parseInt(n.value);
         document.getElementById("nval").innerText = v;
+        const viw = parseInt(iw.value);
         const sql = sqlEl.value;
+        const spVal = spaces.checked ? 1 : 0;
+        const simplifyVal = simplify.checked ? 1 : 0;
+        const jsonfmtVal = jsonfmt.checked ? 1 : 0;
+        const alVal = parseInt(align.value);
         localStorage.setItem("sql", sql);
         localStorage.setItem("n", v);
+        localStorage.setItem("iw", viw);
+        localStorage.setItem("simplify", simplifyVal);
+        localStorage.setItem("jsonfmt", jsonfmtVal);
+        localStorage.setItem("align", alVal);
+        localStorage.setItem("spaces", spVal);
+        fmt.style["tab-size"] = viw;
+        fmt.style["-moz-tab-size"] = viw;
         share.href =
-          "/?n=" + v + "&sql=" + encodeURIComponent(b64EncodeUnicode(sql));
-
+          "/?n=" +
+          v +
+          "&indent=" +
+          viw +
+          "&spaces=" +
+          spVal +
+          "&simplify=" +
+          simplifyVal +
+          "&jsonfmt=" +
+          jsonfmtVal +
+          "&align=" +
+          alVal +
+          "&sql=" +
+          encodeURIComponent(b64EncodeUnicode(sql));
         try {
-          fmtText = globalThis.FmtSQL(sql, v);
+          fmtText = globalThis.FmtSQL(sql, v, viw, spVal, simplifyVal, alVal, jsonfmtVal);
           actualWidth.innerText = Math.max(
             ...fmtText.split("\n").map((v) => v.length)
           );
@@ -320,15 +421,36 @@
         // Load initial defaults from storage.
         let sql = localStorage.getItem("sql");
         let nVal = localStorage.getItem("n");
+        let iwVal = localStorage.getItem("iw");
+        let simplifyVal = localStorage.getItem("simplify") === "0" ? 0:1;
+        let jsonfmtVal = localStorage.getItem("jsonfmt") === "0" ? 0:1;
+        let alVal = localStorage.getItem("align");
+        let spVal = localStorage.getItem("spaces") === "1" ? 1 : 0;
+
         // Load predefined defaults, for each value that didn't have a default in storage.
         if (sql === null) {
-          sql = `SELECT count(*) count, winner, counter * (60 * 5) as counter FROM (SELECT winner, round(length / (60 * 5)) as counter FROM players WHERE build = $1 AND (hero = $2 OR region = $3)) GROUP BY winner, counter;
+          sql = `SELECT count(*) count, winner, counter * (60 * 5) as counter FROM (SELECT winner, round(length / (60 * 5)) as counter FROM players WHERE build = $1 AND (hero = $2 OR region = $3)) WHERE data @> '{"data": {"domain": "github.com"}}'::JSON GROUP BY winner, counter;
 INSERT INTO players(build, hero, region, winner, length) VALUES ($1, $2, $3, $4, $5);
 INSERT INTO players SELECT players_copy ORDER BY length;
 UPDATE players SET count = 0 WHERE build = $1 AND (hero = $2 OR region = $3) LIMIT 1;`;
         }
         if (nVal === null) {
           nVal = 60;
+        }
+        if (nVal === null) {
+          nVal = 60;
+        }
+        if (iwVal === null) {
+          iwVal = 4;
+        }
+        if (simplifyVal === null) {
+          simplifyVal = 1;
+        }
+        if (alVal === null) {
+          alVal = 0;
+        }
+        if (spVal === null) {
+          spVal = 0;
         }
         // Override any value from the URL.
         if (search) {
@@ -338,10 +460,30 @@ UPDATE players SET count = 0 WHERE build = $1 AND (hero = $2 OR region = $3) LIM
           if (search.has("n")) {
             nVal = search.get("n");
           }
+          if (search.has("indent")) {
+            iwVal = search.get("indent");
+          }
+          if (search.has("align")) {
+            alVal = search.get("align");
+          }
+          if (search.has("simplify")) {
+            simplifyVal = search.get("simplify");
+          }
+          if (search.has("jsonfmt")) {
+            jsonfmtVal = search.get("jsonfmt");
+          }
+          if (search.has("spaces")) {
+            spVal = search.get("spaces");
+          }
         }
         // Populate the form.
         sqlEl.value = sql;
         n.value = nVal;
+        iw.value = iwVal;
+        simplify.checked = !!simplifyVal;
+        jsonfmt.checked = !!jsonfmtVal;
+        align.value = alVal;
+        spaces.checked = !!spVal;
       }
       reloadVals();
       pasteEl.checked = localStorage.getItem("paste") === "1";
