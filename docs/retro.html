@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>sequel fumpt</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --crt-green: #00ff41;
+      --crt-green-dim: #00aa2b;
+      --crt-green-bright: #66ff88;
+      --bg-dark: #0d0d0d;
+      --bg-darker: #050505;
+      --shadow-green: rgba(0, 255, 65, 0.3);
+    }
+
+    @media (prefers-color-scheme: light) {
+      :root {
+        --crt-green: #00aa2b;
+        --crt-green-dim: #007a1f;
+        --crt-green-bright: #00ff41;
+        --bg-dark: #f0f0e8;
+        --bg-darker: #e8e8e0;
+        --shadow-green: rgba(0, 170, 43, 0.2);
+      }
+    }
+
+    body {
+      background: var(--bg-darker);
+      color: var(--crt-green);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 14px;
+      line-height: 1.5;
+      padding: 0;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background:
+        repeating-linear-gradient(0deg,
+          rgba(0, 0, 0, 0.15) 0px,
+          transparent 1px,
+          transparent 2px,
+          rgba(0, 0, 0, 0.15) 3px);
+      pointer-events: none;
+      z-index: 1000;
+      animation: scanline 8s linear infinite;
+    }
+
+    @keyframes scanline {
+      0% {
+        transform: translateY(0);
+      }
+
+      100% {
+        transform: translateY(100px);
+      }
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(ellipse at center, transparent 0%, rgba(0, 0, 0, 0.3) 100%);
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .header {
+      border: 2px solid var(--crt-green);
+      padding: 20px;
+      margin-bottom: 20px;
+      background: var(--bg-dark);
+      box-shadow: 0 0 20px var(--shadow-green);
+      animation: flicker 0.15s infinite alternate, slideDown 0.5s ease-out;
+    }
+
+    @keyframes flicker {
+      0% {
+        opacity: 0.98;
+      }
+
+      100% {
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideDown {
+      from {
+        transform: translateY(-100%);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes glow {
+
+      0%,
+      100% {
+        text-shadow: 0 0 10px var(--crt-green), 0 0 20px var(--shadow-green);
+      }
+
+      50% {
+        text-shadow: 0 0 15px var(--crt-green-bright), 0 0 30px var(--shadow-green);
+      }
+    }
+
+    h1 {
+      font-family: 'VT323', monospace;
+      font-size: 56px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      text-shadow: 0 0 10px var(--crt-green), 0 0 20px var(--shadow-green);
+      animation: glow 2s ease-in-out infinite;
+    }
+
+    .ascii-art {
+      font-size: 10px;
+      line-height: 1;
+      margin-bottom: 12px;
+      color: var(--crt-green-dim);
+      white-space: pre;
+    }
+
+    .tagline {
+      font-size: 12px;
+      letter-spacing: 2px;
+      color: var(--crt-green-dim);
+      animation: blink 1.5s step-end infinite;
+    }
+
+    @keyframes blink {
+
+      0%,
+      50% {
+        opacity: 1;
+      }
+
+      51%,
+      100% {
+        opacity: 0.7;
+      }
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: 1fr 240px;
+      gap: 20px;
+      margin-bottom: 20px;
+      animation: fadeIn 0.6s 0.2s both;
+    }
+
+    @media (max-width: 900px) {
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .editor-section {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .panel {
+      border: 2px solid var(--crt-green);
+      background: var(--bg-dark);
+      padding: 16px;
+      box-shadow: 0 0 15px var(--shadow-green);
+      position: relative;
+    }
+
+    .panel-title {
+      position: absolute;
+      top: -12px;
+      left: 12px;
+      background: var(--bg-darker);
+      padding: 0 8px;
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: var(--crt-green-bright);
+      text-transform: uppercase;
+    }
+
+    textarea {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 14px;
+      background: var(--bg-darker);
+      color: var(--crt-green);
+      border: 1px solid var(--crt-green-dim);
+      padding: 12px;
+      width: 100%;
+      height: 280px;
+      resize: vertical;
+      outline: none;
+      box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+      caret-color: var(--crt-green-bright);
+    }
+
+    textarea:focus {
+      border-color: var(--crt-green);
+      box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5), 0 0 10px var(--shadow-green);
+    }
+
+    textarea::placeholder {
+      color: var(--crt-green-dim);
+      opacity: 0.5;
+    }
+
+    .slider-container {
+      margin-top: 20px;
+    }
+
+    .slider-label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      font-size: 12px;
+      letter-spacing: 1px;
+    }
+
+    .slider-value {
+      font-family: 'VT323', monospace;
+      font-size: 24px;
+      color: var(--crt-green-bright);
+      text-shadow: 0 0 5px var(--crt-green);
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 6px;
+      background: var(--crt-green-dim);
+      outline: none;
+      appearance: none;
+      cursor: pointer;
+      box-shadow: 0 0 5px var(--shadow-green);
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      background: var(--crt-green);
+      border: 2px solid var(--crt-green-bright);
+      cursor: grab;
+      box-shadow: 0 0 10px var(--shadow-green);
+    }
+
+    input[type="range"]::-webkit-slider-thumb:active {
+      cursor: grabbing;
+      box-shadow: 0 0 15px var(--crt-green);
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      background: var(--crt-green);
+      border: 2px solid var(--crt-green-bright);
+      cursor: grab;
+      box-shadow: 0 0 10px var(--shadow-green);
+      border-radius: 0;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .option-group {
+      border-bottom: 1px solid var(--crt-green-dim);
+      padding-bottom: 16px;
+    }
+
+    .option-group:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .option-title {
+      font-size: 11px;
+      letter-spacing: 2px;
+      margin-bottom: 12px;
+      color: var(--crt-green-bright);
+      text-transform: uppercase;
+    }
+
+    label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      font-size: 13px;
+      margin-bottom: 8px;
+      transition: color 0.1s;
+    }
+
+    label:hover {
+      color: var(--crt-green-bright);
+    }
+
+    input[type="checkbox"],
+    input[type="radio"] {
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--crt-green);
+      background: var(--bg-darker);
+      cursor: pointer;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    input[type="checkbox"]:checked,
+    input[type="radio"]:checked {
+      background: var(--crt-green);
+      box-shadow: 0 0 8px var(--shadow-green);
+    }
+
+    input[type="checkbox"]:checked::after {
+      content: 'X';
+      position: absolute;
+      top: -3px;
+      left: 2px;
+      color: var(--bg-darker);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    input[type="radio"]:checked::after {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 6px;
+      height: 6px;
+      background: var(--bg-darker);
+    }
+
+    input[type="number"] {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 13px;
+      width: 60px;
+      padding: 4px 8px;
+      border: 2px solid var(--crt-green);
+      background: var(--bg-darker);
+      color: var(--crt-green);
+      caret-color: var(--crt-green-bright);
+    }
+
+    input[type="number"]:focus {
+      outline: none;
+      box-shadow: 0 0 8px var(--shadow-green);
+    }
+
+    button {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 1px;
+      padding: 10px 16px;
+      background: var(--bg-darker);
+      color: var(--crt-green);
+      border: 2px solid var(--crt-green);
+      cursor: pointer;
+      transition: all 0.1s;
+      text-transform: uppercase;
+      width: 100%;
+      margin-bottom: 8px;
+    }
+
+    button:hover {
+      background: var(--crt-green);
+      color: var(--bg-darker);
+      box-shadow: 0 0 15px var(--shadow-green);
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 16px;
+      animation: fadeIn 0.6s 0.3s both;
+    }
+
+    .stat-panel {
+      background: var(--bg-dark);
+      border: 2px solid var(--crt-green);
+      padding: 16px;
+      box-shadow: 0 0 10px var(--shadow-green);
+    }
+
+    .stat-label {
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: var(--crt-green-dim);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+
+    .stat-value {
+      font-family: 'VT323', monospace;
+      font-size: 32px;
+      color: var(--crt-green-bright);
+      text-shadow: 0 0 8px var(--crt-green);
+    }
+
+    .actions {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+      animation: fadeIn 0.6s 0.4s both;
+    }
+
+    .actions button {
+      flex: 1;
+      margin-bottom: 0;
+    }
+
+    .output {
+      background: var(--bg-dark);
+      border: 2px solid var(--crt-green);
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 0 15px var(--shadow-green);
+      position: relative;
+      animation: fadeIn 0.6s 0.5s both;
+    }
+
+    .output::before {
+      content: '> OUTPUT';
+      position: absolute;
+      top: -12px;
+      left: 12px;
+      background: var(--bg-darker);
+      padding: 0 8px;
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: var(--crt-green-bright);
+    }
+
+    pre {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 14px;
+      overflow-x: auto;
+      line-height: 1.6;
+      white-space: pre;
+      color: var(--crt-green);
+    }
+
+    .footer {
+      border: 2px solid var(--crt-green-dim);
+      padding: 16px;
+      text-align: center;
+      font-size: 11px;
+      letter-spacing: 2px;
+      background: var(--bg-dark);
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      align-items: center;
+      animation: fadeIn 0.6s 0.6s both;
+    }
+
+    a {
+      color: var(--crt-green-bright);
+      text-decoration: none;
+      transition: all 0.1s;
+      text-shadow: 0 0 5px var(--shadow-green);
+    }
+
+    a:hover {
+      color: var(--crt-green-bright);
+      text-shadow: 0 0 10px var(--crt-green);
+    }
+
+    .cursor {
+      animation: blink-cursor 1s step-end infinite;
+    }
+
+    @keyframes blink-cursor {
+
+      0%,
+      50% {
+        opacity: 1;
+      }
+
+      51%,
+      100% {
+        opacity: 0;
+      }
+    }
+
+    .jsonly {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="ascii-art"> ___ ___ _
+        / __|/ _ \| |
+        \__ \ (_) | |__
+        |___/\__\_\____|</div>
+      <h1>sequel fumpt</h1>
+      <div class="tagline">[ TYPE SOME SQL. MOVE THE SLIDER TO SET OUTPUT WIDTH. ] <span class="cursor">█</span></div>
+    </div>
+
+    <form name="theform">
+      <div class="workspace">
+        <div class="editor-section">
+          <div class="panel">
+            <div class="panel-title">[ INPUT ]</div>
+            <textarea id="sql" name="sql" spellcheck="false" placeholder="> ENTER SQL QUERY..." onChange="range()"
+              onInput="range()"></textarea>
+          </div>
+
+          <div class="panel">
+            <div class="panel-title">[ LINE WIDTH ]</div>
+            <div class="slider-container">
+              <div class="slider-label">
+                <span>TARGET</span>
+                <span class="slider-value" id="nval">60</span>
+              </div>
+              <input type="range" min="1" max="200" step="1" name="n" value="60" onChange="range()" onInput="range()"
+                id="n">
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">[ OPTIONS ]</div>
+          <div class="options">
+            <div class="option-group">
+              <div class="option-title">▸ Format</div>
+              <label>
+                <span>TAB WIDTH</span>
+                <input type="number" min="1" max="16" step="1" name="indent" value="4" onChange="range()"
+                  onInput="range()" id="indent">
+              </label>
+              <label>
+                <input type="checkbox" checked onChange="range()" onInput="range()" name="simplify" id="simplify">
+                <span>SIMPLIFY</span>
+              </label>
+              <label>
+                <input type="checkbox" checked onChange="range()" onInput="range()" name="jsonfmt" id="jsonfmt">
+                <span>JSON FMT</span>
+              </label>
+              <label>
+                <input type="checkbox" onChange="range()" onInput="range()" name="spaces" id="spaces">
+                <span>USE SPACES</span>
+              </label>
+            </div>
+
+            <div class="option-group">
+              <div class="option-title">▸ Alignment</div>
+              <label>
+                <input type="radio" name="align" value="0" onChange="range()" onInput="range()" id="align1" checked>
+                <span>NONE</span>
+              </label>
+              <label>
+                <input type="radio" name="align" value="2" onChange="range()" onInput="range()" id="align2">
+                <span>FULL</span>
+              </label>
+              <label>
+                <input type="radio" name="align" value="1" onChange="range()" onInput="range()" id="align3">
+                <span>PARTIAL</span>
+              </label>
+              <label>
+                <input type="radio" name="align" value="3" onChange="range()" onInput="range()" id="align4">
+                <span>OTHER</span>
+              </label>
+            </div>
+
+            <div class="option-group">
+              <button type="button" onClick="resetVals()">[ RESET ]</button>
+              <button type="button" onClick="clearSQL()">[ CLEAR ]</button>
+              <label>
+                <input type="checkbox" onChange="autoPaste()" onInput="autoPaste()" name="paste" id="paste">
+                <span>AUTO PASTE</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat-panel">
+          <div class="stat-label">▸ Target</div>
+          <div class="stat-value" id="nval2">60</div>
+        </div>
+        <div class="stat-panel">
+          <div class="stat-label">▸ Actual</div>
+          <div class="stat-value" id="actual_width">--</div>
+        </div>
+        <div class="stat-panel">
+          <div class="stat-label">▸ Bytes</div>
+          <div class="stat-value" id="actual_bytes">--</div>
+        </div>
+      </div>
+
+      <div class="actions jsonly">
+        <button type="button" id="copy">[ COPY TO CLIPBOARD ]</button>
+        <a href="" id="share"><button type="button">[ SHARE CONFIG ]</button></a>
+      </div>
+
+      <input type="submit" id="submitButton" style="display: none;">
+    </form>
+
+    <div class="output">
+      <pre id="fmt"></pre>
+    </div>
+
+    <div class="footer">
+      <span>▸ WASM EDITION</span>
+      <span>|</span>
+      <a href="https://github.com/madelynnblue/sqlfmt">GITHUB</a>
+      <span>|</span>
+      <a href="/">BASE</a>
+      <a href="/brutalist.html">BRUTALIST</a>
+      <a href="/soft.html">SOFT</a>
+      <span>▸</span>
+    </div>
+  </div>
+
+  <script src="wasm_exec.js"></script>
+  <script src="sqlfmt.js"></script>
+</body>
+
+</html>

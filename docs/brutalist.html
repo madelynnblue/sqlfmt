@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>sequel fumpt</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Archivo+Black&display=swap"
+    rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --fg: #0a0a0a;
+      --bg: #f5f5f0;
+      --accent: #ff3366;
+      --gray: #666;
+      --border: #000;
+      --surface: #fff;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --fg: #f5f5f0;
+        --bg: #0a0a0a;
+        --accent: #ff3366;
+        --gray: #999;
+        --border: #333;
+        --surface: #1a1a1a;
+      }
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      line-height: 1.5;
+      padding: 0;
+      overflow-x: hidden;
+    }
+
+    .header {
+      background: var(--fg);
+      color: var(--bg);
+      padding: 24px 20px;
+      border-bottom: 4px solid var(--accent);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      animation: slideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes slideDown {
+      from {
+        transform: translateY(-100%);
+      }
+
+      to {
+        transform: translateY(0);
+      }
+    }
+
+    h1 {
+      font-family: 'Archivo Black', sans-serif;
+      font-size: 32px;
+      letter-spacing: -1px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .tagline {
+      opacity: 0.7;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: 1fr 200px;
+      gap: 20px;
+      margin-bottom: 20px;
+      animation: fadeIn 0.5s 0.1s both;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 900px) {
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .editor-section {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    textarea {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      background: var(--surface);
+      color: var(--fg);
+      border: 2px solid var(--border);
+      padding: 16px;
+      width: 100%;
+      height: 280px;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    textarea:focus {
+      border-color: var(--accent);
+    }
+
+    .slider-container {
+      background: var(--surface);
+      border: 2px solid var(--border);
+      padding: 16px;
+    }
+
+    .slider-label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-weight: 700;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 8px;
+      background: var(--bg);
+      border: 2px solid var(--border);
+      outline: none;
+      appearance: none;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      appearance: none;
+      width: 24px;
+      height: 24px;
+      background: var(--accent);
+      border: 2px solid var(--border);
+      cursor: grab;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:active {
+      cursor: grabbing;
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 24px;
+      height: 24px;
+      background: var(--accent);
+      border: 2px solid var(--border);
+      cursor: grab;
+      border-radius: 0;
+    }
+
+    .options {
+      background: var(--surface);
+      border: 2px solid var(--border);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .option-group {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+    }
+
+    .option-group:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .option-title {
+      font-weight: 700;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      color: var(--accent);
+    }
+
+    label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+
+    input[type="checkbox"],
+    input[type="radio"] {
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--border);
+      background: var(--bg);
+      cursor: pointer;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    input[type="checkbox"]:checked,
+    input[type="radio"]:checked {
+      background: var(--accent);
+    }
+
+    input[type="checkbox"]:checked::after {
+      content: '×';
+      position: absolute;
+      top: -4px;
+      left: 2px;
+      color: var(--bg);
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    input[type="radio"] {
+      border-radius: 50%;
+    }
+
+    input[type="radio"]:checked::after {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 6px;
+      height: 6px;
+      background: var(--bg);
+      border-radius: 50%;
+    }
+
+    input[type="number"] {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      width: 60px;
+      padding: 4px 8px;
+      border: 2px solid var(--border);
+      background: var(--bg);
+      color: var(--fg);
+    }
+
+    button {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 10px 16px;
+      background: var(--fg);
+      color: var(--bg);
+      border: 2px solid var(--border);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    button:hover {
+      background: var(--accent);
+      color: var(--bg);
+      transform: translate(-2px, -2px);
+      box-shadow: 4px 4px 0 var(--border);
+    }
+
+    button:active {
+      transform: translate(0, 0);
+      box-shadow: none;
+    }
+
+    .stats {
+      font-size: 11px;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      padding: 12px 16px;
+      margin-bottom: 12px;
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+      animation: fadeIn 0.5s 0.2s both;
+    }
+
+    .stat {
+      display: flex;
+      gap: 8px;
+    }
+
+    .stat-label {
+      color: var(--gray);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-value {
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      animation: fadeIn 0.5s 0.3s both;
+    }
+
+    .output {
+      background: var(--surface);
+      border: 2px solid var(--border);
+      padding: 20px;
+      margin-bottom: 20px;
+      animation: fadeIn 0.5s 0.4s both;
+    }
+
+    pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      overflow-x: auto;
+      line-height: 1.6;
+      white-space: pre;
+    }
+
+    .footer {
+      font-size: 11px;
+      padding: 20px;
+      border-top: 2px solid var(--border);
+      display: flex;
+      gap: 16px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      animation: fadeIn 0.5s 0.5s both;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+      border-bottom: 2px solid transparent;
+      transition: border-color 0.2s;
+    }
+
+    a:hover {
+      border-bottom-color: var(--accent);
+    }
+
+    .jsonly {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="header">
+    <h1>sequel fumpt</h1>
+    <div class="tagline">Type some SQL. Move the slider to set output width.</div>
+  </div>
+
+  <div class="container">
+    <form name="theform">
+      <div class="workspace">
+        <div class="editor-section">
+          <textarea id="sql" name="sql" spellcheck="false" placeholder="// PASTE YOUR SQL HERE" onChange="range()"
+            onInput="range()"></textarea>
+
+          <div class="slider-container">
+            <div class="slider-label">
+              <span>Line Width</span>
+              <span id="nval">60</span>
+            </div>
+            <input type="range" min="1" max="200" step="1" name="n" value="60" onChange="range()" onInput="range()"
+              id="n">
+          </div>
+        </div>
+
+        <div class="options">
+          <div class="option-group">
+            <div class="option-title">Format</div>
+            <label>
+              <span>Tab Width</span>
+              <input type="number" min="1" max="16" step="1" name="indent" value="4" onChange="range()"
+                onInput="range()" id="indent">
+            </label>
+            <label>
+              <input type="checkbox" checked onChange="range()" onInput="range()" name="simplify" id="simplify">
+              <span>Simplify</span>
+            </label>
+            <label>
+              <input type="checkbox" checked onChange="range()" onInput="range()" name="jsonfmt" id="jsonfmt">
+              <span>JSON Format</span>
+            </label>
+            <label>
+              <input type="checkbox" onChange="range()" onInput="range()" name="spaces" id="spaces">
+              <span>Use Spaces</span>
+            </label>
+          </div>
+
+          <div class="option-group">
+            <div class="option-title">Alignment</div>
+            <label>
+              <input type="radio" name="align" value="0" onChange="range()" onInput="range()" id="align1" checked>
+              <span>None</span>
+            </label>
+            <label>
+              <input type="radio" name="align" value="2" onChange="range()" onInput="range()" id="align2">
+              <span>Full</span>
+            </label>
+            <label>
+              <input type="radio" name="align" value="1" onChange="range()" onInput="range()" id="align3">
+              <span>Partial</span>
+            </label>
+            <label>
+              <input type="radio" name="align" value="3" onChange="range()" onInput="range()" id="align4">
+              <span>Other</span>
+            </label>
+          </div>
+
+          <div class="option-group">
+            <button type="button" onClick="resetVals()">Reset</button>
+            <button type="button" onClick="clearSQL()" style="margin-top: 8px;">Clear</button>
+            <label style="margin-top: 8px;">
+              <input type="checkbox" onChange="autoPaste()" onInput="autoPaste()" name="paste" id="paste">
+              <span>Auto Paste</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <span class="stat-label">Target:</span>
+          <span class="stat-value" id="nval2">60</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Actual:</span>
+          <span class="stat-value" id="actual_width">—</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Bytes:</span>
+          <span class="stat-value" id="actual_bytes">—</span>
+        </div>
+      </div>
+
+      <div class="actions jsonly">
+        <button type="button" id="copy">Copy to Clipboard</button>
+        <a href="" id="share"><button type="button">Share</button></a>
+      </div>
+
+      <input type="submit" id="submitButton" style="display: none;">
+    </form>
+
+    <div class="output">
+      <pre id="fmt"></pre>
+    </div>
+
+    <div class="footer">
+      <span>WASM EDITION</span>
+      <a href="https://github.com/madelynnblue/sqlfmt">GITHUB</a>
+      <a href="/">BASE</a>
+      <a href="/retro.html">RETRO</a>
+      <a href="/soft.html">SOFT</a>
+    </div>
+  </div>
+
+  <script src="wasm_exec.js"></script>
+  <script src="sqlfmt.js"></script>
+</body>
+
+</html>
